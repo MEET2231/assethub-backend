@@ -33,21 +33,7 @@ public class BookingService {
     }
 
     private Timestamp parseTimestamp(Object obj) {
-        if (obj == null) return null;
-        if (obj instanceof Timestamp ts) return ts;
-        if (obj instanceof OffsetDateTime odt) return Timestamp.from(odt.toInstant());
-        if (obj instanceof Instant inst) return Timestamp.from(inst);
-        if (obj instanceof java.time.LocalDateTime ldt) return Timestamp.valueOf(ldt);
-        String str = obj.toString().trim();
-        try {
-            return Timestamp.from(Instant.parse(str));
-        } catch (Exception e1) {
-            try {
-                return Timestamp.from(OffsetDateTime.parse(str, DateTimeFormatter.ISO_DATE_TIME).toInstant());
-            } catch (Exception e2) {
-                return Timestamp.valueOf(str.replace("T", " ").replace("Z", ""));
-            }
-        }
+        return HelperService.parseTimestamp(obj);
     }
 
     public List<Map<String, Object>> getBookings(Long userId, String role, String assetId, String mine, String includeCancelled) {
@@ -100,9 +86,21 @@ public class BookingService {
             throw new BadRequestException("asset_id, start_time, end_time required");
         }
 
-        Long assetId = ((Number) assetIdObj).longValue();
-        Timestamp startTime = parseTimestamp(startObj);
-        Timestamp endTime = parseTimestamp(endObj);
+        Long assetId;
+        try {
+            assetId = HelperService.toLong(assetIdObj);
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid asset_id");
+        }
+
+        Timestamp startTime;
+        Timestamp endTime;
+        try {
+            startTime = parseTimestamp(startObj);
+            endTime = parseTimestamp(endObj);
+        } catch (Exception e) {
+            throw new BadRequestException("Invalid start_time or end_time format: " + e.getMessage());
+        }
 
         if (startTime == null || endTime == null || !endTime.after(startTime)) {
             throw new BadRequestException("end_time must be after start_time");

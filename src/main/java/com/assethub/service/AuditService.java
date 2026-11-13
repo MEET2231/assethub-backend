@@ -192,9 +192,9 @@ public class AuditService {
             throw new BadRequestException("name, start_date, end_date required");
         }
 
-        Date startDate = Date.valueOf(startDateStr);
-        Date endDate = Date.valueOf(endDateStr);
-        Long scopeDeptId = req.get("scope_department_id") != null ? ((Number) req.get("scope_department_id")).longValue() : null;
+        Date startDate = HelperService.parseDate(startDateStr);
+        Date endDate = HelperService.parseDate(endDateStr);
+        Long scopeDeptId = HelperService.toLong(req.get("scope_department_id"));
         String scopeLocation = (String) req.get("scope_location");
 
         jdbcTemplate.update(
@@ -213,8 +213,8 @@ public class AuditService {
         Object auditorIdsObj = req.get("auditor_ids");
         if (auditorIdsObj instanceof List<?> list) {
             for (Object item : list) {
-                if (item instanceof Number num) {
-                    Long auditorId = num.longValue();
+                Long auditorId = HelperService.toLong(item);
+                if (auditorId != null) {
                     jdbcTemplate.update("INSERT INTO audit_assignments (cycle_id, auditor_id) VALUES (?, ?)", cycleId, auditorId);
                     helperService.notify(auditorId, "audit_assigned", "You've been assigned as auditor on: " + name.trim());
                 }
@@ -238,8 +238,8 @@ public class AuditService {
         Map<String, Object> current = rows.get(0);
 
         String name = req.containsKey("name") && req.get("name") != null ? (String) req.get("name") : (String) current.get("name");
-        Date startDate = req.containsKey("start_date") && req.get("start_date") != null ? Date.valueOf((String) req.get("start_date")) : (Date) current.get("start_date");
-        Date endDate = req.containsKey("end_date") && req.get("end_date") != null ? Date.valueOf((String) req.get("end_date")) : (Date) current.get("end_date");
+        Date startDate = req.containsKey("start_date") && req.get("start_date") != null ? HelperService.parseDate(req.get("start_date")) : HelperService.parseDate(current.get("start_date"));
+        Date endDate = req.containsKey("end_date") && req.get("end_date") != null ? HelperService.parseDate(req.get("end_date")) : HelperService.parseDate(current.get("end_date"));
 
         jdbcTemplate.update(
                 "UPDATE audit_cycles SET name = ?, start_date = ?, end_date = ? WHERE id = ?",

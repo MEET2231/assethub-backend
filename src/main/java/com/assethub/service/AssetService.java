@@ -225,12 +225,11 @@ public class AssetService {
         if (name == null || name.isBlank() || categoryIdObj == null) {
             throw new BadRequestException("name and category_id are required");
         }
-        Long categoryId = ((Number) categoryIdObj).longValue();
+        Long categoryId = HelperService.toLong(categoryIdObj);
 
         String tag = helperService.nextAssetTag();
         String serialNumber = (String) req.get("serial_number");
-        String acqDateStr = (String) req.get("acquisition_date");
-        Date acqDate = acqDateStr != null && !acqDateStr.isBlank() ? Date.valueOf(acqDateStr) : null;
+        Date acqDate = HelperService.parseDate(req.get("acquisition_date"));
         BigDecimal acqCost = req.get("acquisition_cost") != null ? new BigDecimal(String.valueOf(req.get("acquisition_cost"))) : null;
         String condition = req.get("condition") != null ? (String) req.get("condition") : "good";
         String location = (String) req.get("location");
@@ -239,8 +238,7 @@ public class AssetService {
         String brand = (String) req.get("brand");
         String model = (String) req.get("model");
         String vendor = (String) req.get("vendor");
-        String warrantyStr = (String) req.get("warranty_expiry");
-        Date warrantyExpiry = warrantyStr != null && !warrantyStr.isBlank() ? Date.valueOf(warrantyStr) : null;
+        Date warrantyExpiry = HelperService.parseDate(req.get("warranty_expiry"));
 
         String customValuesJson = "{}";
         if (req.containsKey("custom_values") && req.get("custom_values") != null) {
@@ -294,10 +292,9 @@ public class AssetService {
 
         Date warrantyExpiry = null;
         if (req.containsKey("warranty_expiry")) {
-            String wStr = (String) req.get("warranty_expiry");
-            warrantyExpiry = (wStr != null && !wStr.isBlank()) ? Date.valueOf(wStr) : null;
+            warrantyExpiry = HelperService.parseDate(req.get("warranty_expiry"));
         } else if (current.get("warranty_expiry") != null) {
-            warrantyExpiry = (Date) current.get("warranty_expiry");
+            warrantyExpiry = HelperService.parseDate(current.get("warranty_expiry"));
         }
 
         jdbcTemplate.update(

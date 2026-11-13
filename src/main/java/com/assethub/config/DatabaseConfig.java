@@ -141,8 +141,8 @@ public class DatabaseConfig {
             org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder encoder = new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder();
             int userCount = jdbcTemplate.queryForObject("SELECT count(*) FROM users", Integer.class);
             log.info("USERS COUNT IN DB: {}", userCount);
-            jdbcTemplate.update("UPDATE users SET password_hash = ? WHERE LOWER(email) = 'admin@assetflow.com'", encoder.encode("admin123"));
-            jdbcTemplate.update("UPDATE users SET password_hash = ? WHERE LOWER(email) != 'admin@assetflow.com'", encoder.encode("password123"));
+            jdbcTemplate.update("UPDATE users SET password_hash = ? WHERE LOWER(email) IN ('admin@assetflow.com', 'admin@assethub.com')", encoder.encode("admin123"));
+            jdbcTemplate.update("UPDATE users SET password_hash = ? WHERE LOWER(email) NOT IN ('admin@assetflow.com', 'admin@assethub.com')", encoder.encode("password123"));
 
             // If PostgreSQL, resync sequences
             try (Connection conn = dataSource.getConnection()) {

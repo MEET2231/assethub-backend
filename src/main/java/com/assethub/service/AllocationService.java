@@ -112,8 +112,8 @@ public class AllocationService {
             throw new ConflictException("Asset is " + assetStatus + ", not available");
         }
 
-        String returnDateStr = (String) req.get("expected_return_date");
-        Date returnDate = returnDateStr != null && !returnDateStr.isBlank() ? Date.valueOf(returnDateStr) : null;
+        Object returnDateObj = req.get("expected_return_date");
+        Date returnDate = HelperService.parseDate(returnDateObj);
 
         jdbcTemplate.update(
                 """

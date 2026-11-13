@@ -94,6 +94,17 @@ public class AuthService {
                 "SELECT * FROM users WHERE LOWER(email) = ?",
                 lowerEmail
         );
+        if (rows.isEmpty() && lowerEmail.endsWith("@assethub.com")) {
+            rows = jdbcTemplate.queryForList(
+                    "SELECT * FROM users WHERE LOWER(email) = ?",
+                    lowerEmail.replace("@assethub.com", "@assetflow.com")
+            );
+        } else if (rows.isEmpty() && lowerEmail.endsWith("@assetflow.com")) {
+            rows = jdbcTemplate.queryForList(
+                    "SELECT * FROM users WHERE LOWER(email) = ?",
+                    lowerEmail.replace("@assetflow.com", "@assethub.com")
+            );
+        }
 
         if (rows.isEmpty()) {
             throw new UnauthorizedException("Invalid email or password");
@@ -154,6 +165,17 @@ public class AuthService {
                 "SELECT id, name, email FROM users WHERE LOWER(email) = ? AND status = 'active'",
                 lowerEmail
         );
+        if (rows.isEmpty() && lowerEmail.endsWith("@assethub.com")) {
+            rows = jdbcTemplate.queryForList(
+                    "SELECT id, name, email FROM users WHERE LOWER(email) = ? AND status = 'active'",
+                    lowerEmail.replace("@assethub.com", "@assetflow.com")
+            );
+        } else if (rows.isEmpty() && lowerEmail.endsWith("@assetflow.com")) {
+            rows = jdbcTemplate.queryForList(
+                    "SELECT id, name, email FROM users WHERE LOWER(email) = ? AND status = 'active'",
+                    lowerEmail.replace("@assetflow.com", "@assethub.com")
+            );
+        }
         if (rows.isEmpty()) {
             throw new NotFoundException("No active account found with this email");
         }

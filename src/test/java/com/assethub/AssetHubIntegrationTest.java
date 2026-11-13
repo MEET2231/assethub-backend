@@ -258,6 +258,21 @@ public class AssetHubIntegrationTest {
                         .content(objectMapper.writeValueAsString(bookReq2)))
                 .andExpect(status().isConflict())
                 .andExpect(jsonPath("$.error", containsString("Overlaps an existing booking")));
+
+        // Verify HTML datetime-local format without seconds (e.g. 2026-10-12T14:30) as submitted by React frontend
+        Map<String, Object> bookReqDateTimeLocal = Map.of(
+                "asset_id", 3,
+                "start_time", "2026-10-12T14:30",
+                "end_time", "2026-10-12T16:00",
+                "purpose", "Client Presentation"
+        );
+
+        mockMvc.perform(post("/api/bookings")
+                        .header("Authorization", "Bearer " + adminToken)
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(bookReqDateTimeLocal)))
+                .andExpect(status().isCreated())
+                .andExpect(jsonPath("$.status").value("pending"));
     }
 
     @Test
